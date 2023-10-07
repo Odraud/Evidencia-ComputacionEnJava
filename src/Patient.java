@@ -10,6 +10,6 @@ public class Patient extends Record{
     }
     @Override
     public String toString() {
-        return "Id: " + recordId + " - Nombre: " + name + " - Teléfono: " + phone;
+        return recordId + ", " + name + ", " + phone + "\n";
     }
 }

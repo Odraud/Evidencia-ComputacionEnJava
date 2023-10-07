@@ -16,7 +16,7 @@ public class Main {
     static HashMap<String,Doctor> doctorMap = new HashMap<String,Doctor>();
     static HashMap<String,Patient> patientMap = new HashMap<String,Patient>();
     static HashMap<String,Appt> apptMap = new HashMap<String,Appt>();
-
+    static final long ONE_MINUTE_IN_MILLIS = 60000;
     static Scanner scan = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -29,60 +29,30 @@ public class Main {
         loadInfo(filePathMap);
         System.out.println("ADMINS");
         for(String id : adminMap.keySet()){
-            System.out.println(adminMap.get(id));
+            System.out.print(adminMap.get(id));
         }
         System.out.println("DOCTORS");
         for(String id : doctorMap.keySet()){
-            System.out.println(doctorMap.get(id));
+            System.out.print(doctorMap.get(id));
         }
         System.out.println("PATIENTS");
         for(String id : patientMap.keySet()){
-            System.out.println(patientMap.get(id));
+            System.out.print(patientMap.get(id));
         }
         System.out.println("APPTS");
         for(String id : apptMap.keySet()){
-            System.out.println(apptMap.get(id));
+            System.out.print(apptMap.get(id));
         }
 
         boolean verified = printLogin();
 
         if(verified == true){
-            printMenu();
+            printMenu(filePathMap);
         } else {
             System.out.println("Saliendo.");
         }
 
     }
-    /*public static HashMap<String,Admin> loadAdmins(){
-        HashMap<String,Admin> adminsMap = new HashMap<String,Admin>();
-        BufferedReader bufferedReader = null;
-        for()
-        String info[] = new String[];
-        try {
-            bufferedReader = new BufferedReader(new FileReader(FILEPATHADMIN));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                info = line.split(", ");
-                Admin admin = new Admin();
-                admin.recordId = info[0];
-                admin.name = info[1];
-                admin.password = info[2];
-
-                adminsMap.put(info[0], admin);
-            }
-        } catch(IOException e) {
-            System.out.println("IOException catched while reading: " + e.getMessage());
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            } catch (IOException e) {
-                System.out.println("IOException catched while closing: " + e.getMessage());
-            }
-        }
-        return adminsMap;
-    }*/
     public static void loadInfo(HashMap<String,String> filePathMap){
         BufferedReader bufferedReader = null;
         for(String filePath : filePathMap.keySet()) {
@@ -139,7 +109,7 @@ public class Main {
 
     }
     public static boolean printLogin(){
-        boolean verified = false;
+        boolean verified = false, validValue = true;
         int option = 0, option2 = 0;
         String user, passwordIn;
         do{
@@ -158,37 +128,56 @@ public class Main {
                             option2 = 3;
                             System.out.println("Accediendo. Espere un momento.");
                         } else {
-                            System.out.println("Su contraseña es incorrecta.");
-                            System.out.println("Ingrese la opción que desee.");
-                            System.out.println("1. Intentar de nuevo.");
-                            System.out.println("2. Cambiar de usuario.");
-                            System.out.println("3. Salir.");
-                            option2 = Integer.parseInt(scan.next());
-                            option = 2;
+                            do{
+                                System.out.println("Su contraseña es incorrecta.");
+                                System.out.println("Ingrese la opción que desee.");
+                                System.out.println("1. Intentar de nuevo.");
+                                System.out.println("2. Cambiar de usuario.");
+                                System.out.println("3. Salir.");
+                                try{
+                                    validValue = true;
+                                    option2 = Integer.parseInt(scan.next());
+                                    option = 2;
+                                } catch (NumberFormatException ex) {
+                                    validValue = false;
+                                    System.out.println("Por favor, ingresa un valor válido.");
+                                }
+                            } while (validValue != true);
                         }
                     }while (option2 == 1) ;
                 } else {
-                    System.out.println("Su usuario no cuenta con permisos de administrador.");
-                    System.out.println("¿Quiere intentar de nuevo?");
-                    System.out.println("1. Sí");
-                    System.out.println("2. No");
-                    option = Integer.parseInt(scan.next());
+                    do {
+                        System.out.println("Su usuario no cuenta con permisos de administrador.");
+                        System.out.println("¿Quiere intentar de nuevo?");
+                        System.out.println("1. Sí");
+                        System.out.println("2. No");
+                        try {
+                            option = Integer.parseInt(scan.next());
+                        } catch (NumberFormatException ex) {
+                            validValue = false;
+                            System.out.println("Por favor, ingresa un valor válido.");
+                        }
+                    } while (validValue != true);
                 }
             } while (option != 2 || option2 == 2);
         } while(verified != true && option != 2);
         return verified;
     }
-    public static void printMenu(){
+    public static void printMenu(HashMap<String,String> filePathMap){
         int option = 0;
-        System.out.println("Bienvenido/a: ");
-        System.out.println("Por favor, ingrese a la función deseada");
-        System.out.println("1. Crear registro para Doctor");
-        System.out.println("2. Crear registro para Paciente");
-        System.out.println("3. Crear registo para Cita");
-        System.out.println("4. Salir");
-        do{
+        boolean validValue = true;
+        do {
+            System.out.println("Bienvenido/a: ");
+            System.out.println("Por favor, ingrese a la función deseada");
+            System.out.println("1. Crear registro para Doctor");
+            System.out.println("2. Crear registro para Paciente");
+            System.out.println("3. Crear registo para Cita");
+            System.out.println("4. Salir");
+            option = Integer.parseInt(scan.next());
+            scan.nextLine();
             try {
-                switch(option){
+                validValue = true;
+                switch (option) {
                     case 1:
                         insertDoctor();
                         break;
@@ -199,81 +188,182 @@ public class Main {
                         insertAppt();
                         break;
                     case 4:
-                        System.out.println("Su agenda se ha guardado exitosamente.");
-                        //saveFiles();
+                        System.out.println("La base de datos se ha guardado exitosamente.");
+                        filePathMap.remove(FILEPATHADMIN);
+                        saveFiles(filePathMap);
                         break;
                     default:
                         System.out.println("Por favor, ingrese una opción válida.");
                         break;
                 }
-            } catch (NumberFormatException ex){
+            } catch (NumberFormatException ex) {
+                validValue = false;
                 System.out.println("Por favor, ingrese una opción válida.");
             }
-        } while (option != 4);
+        } while (option != 4 && validValue != false);
     }
     public static void insertDoctor(){
         String drId, name, specialty;
-        System.out.println("Ingrese el id del Doctor:");
-        drId = scan.next();
-        System.out.println("Ingrese el nombre del Doctor:");
-        name = scan.next();
-        System.out.println("Ingrese la especialidad del Doctor:");
-        specialty = scan.next();
-        if(!doctorMap.containsKey(drId)){
-            Doctor doctor = new Doctor();
-            doctor.recordId = drId;
-            doctor.name = name;
-            doctor.specialty = specialty;
-            doctorMap.put(drId,doctor);
-            System.out.println("Se creó el registro exitosamente.");
-        } else {
-            System.out.println("Ese registro ya existe. Verifique los datos.");
-        }
-
+        boolean recordCreated = true;
+        do {
+            System.out.println("Ingrese el id del Doctor:");
+            drId = scan.nextLine();
+            if (!doctorMap.containsKey(drId)) {
+                System.out.println("Ingrese el nombre del Doctor:");
+                name = scan.nextLine();
+                System.out.println("Ingrese la especialidad del Doctor:");
+                specialty = scan.nextLine();
+                Doctor doctor = new Doctor();
+                doctor.recordId = drId;
+                doctor.name = name;
+                doctor.specialty = specialty;
+                doctorMap.put(drId, doctor);
+                recordCreated = true;
+                System.out.println("Se creó el registro exitosamente.");
+            } else {
+                recordCreated = false;
+                System.out.println("Ese registro ya existe. Verifique los datos.");
+            }
+        } while(recordCreated != true);
     }
     public static void insertPatient(){
         String patientId, name, phone;
-        System.out.println("Ingrese el id del Paciente:");
-        patientId = scan.next();
-        System.out.println("Ingrese el nombre del Paciente:");
-        name = scan.next();
-        System.out.println("Ingrese el teléfono del Paciente:");
-        phone = scan.next();
-        if(!patientMap.containsKey(patientId)){
-            Patient patient = new Patient();
-            patient.recordId = patientId;
-            patient.name = name;
-            patient.phone = phone;
-            patientMap.put(patientId, patient);
-        } else {
-            System.out.println("Ese registro ya existe. Verifique los datos.");
-        }
-
+        boolean recordCreated = true;
+        do {
+            System.out.println("Ingrese el id del Paciente:");
+            patientId = scan.nextLine();
+            if (!patientMap.containsKey(patientId)) {
+                System.out.println("Ingrese el nombre del Paciente:");
+                name = scan.nextLine();
+                System.out.println("Ingrese el teléfono del Paciente:");
+                phone = scan.nextLine();
+                Patient patient = new Patient();
+                patient.recordId = patientId;
+                patient.name = name;
+                patient.phone = phone;
+                patientMap.put(patientId, patient);
+                System.out.println("Se creó el registro exitosamente.");
+                recordCreated = true;
+            } else {
+                recordCreated = false;
+                System.out.println("Ese registro ya existe. Verifique los datos.");
+            }
+        } while(recordCreated != true);
     }
     public static void insertAppt(){
+        String apptId, reason, dateTime, drId, patientId;
+        boolean recordCreated = true, validDr = true, validPatient = true;
         System.out.println("Ingrese el id de la Cita:");
-        System.out.println("Ingrese fecha y hora de la Cita:");
-        System.out.println("Ingrese motivo de la Cita:");
-        System.out.println("Ingrese el Id del Doctor asignado:");
-        System.out.println("Ingrese el Id del Paciente asignado:");
-    }
-    /*public static void saveFiles(){
-        BufferedWriter bufferedWriter = null;
-        try {
-            bufferedWriter = new BufferedWriter(new FileWriter(FILEPATH));
-            for(String phone : addressBook.keySet()){
-                bufferedWriter.write(phone + ", " + addressBook.get(phone) + "\n");
-            }
-        } catch(IOException e) {
-            System.out.println("IOException catched while reading: " + e.getMessage());
-        } finally {
+        apptId = scan.nextLine();
+        do {
             try {
-                if (bufferedWriter != null) {
-                    bufferedWriter.close();
+                if (!apptMap.containsKey(apptId)) {
+                    System.out.println("Ingrese motivo de la Cita:");
+                    reason = scan.nextLine();
+                    System.out.println("Ingrese fecha y hora de la Cita en formato dd/MM/yyyy HH:mm:");
+                    dateTime = scan.nextLine();
+                    Appt appt = new Appt();
+                    appt.recordId = apptId;
+                    appt.name = reason;
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    Date date = df.parse(dateTime);
+                    appt.dateTime = date;
+                    do {
+                        System.out.println("Ingrese el Id del Doctor asignado:");
+                        drId = scan.nextLine();
+                        if (doctorMap.containsKey(drId)) {
+                            validDr = checkAvailability(drId, date, "Doctor");
+                        } else {
+                            System.out.println("Ese Id no se encontró en la base de datos. Se le solicitará la creación de un registro nuevo.");
+                            insertDoctor();
+                            validDr = true;
+                        }
+                    } while (validDr != true);
+                    do {
+                        System.out.println("Ingrese el Id del Paciente asignado:");
+                        patientId = scan.nextLine();
+                        if (patientMap.containsKey(patientId)) {
+                            validPatient = checkAvailability(patientId, date, "Patient");
+                        } else {
+                            System.out.println("Ese Id no se encontró en la base de datos. Se le solicitará la creación de un registro nuevo.");
+                            insertPatient();
+                            validPatient = true;
+                        }
+                    } while (validPatient != true);
+                    appt.doctor = drId;
+                    appt.patient = patientId;
+
+                    apptMap.put(apptId, appt);
+                    System.out.println("Se creó el registro exitosamente.");
+                    recordCreated=true;
+                } else {
+                    recordCreated=false;
+                    System.out.println("Ese registro ya existe. Verifique los datos.");
                 }
-            } catch (IOException e) {
-                System.out.println("IOException catched while closing: " + e.getMessage());
+            } catch (ParseException e) {
+                System.out.println("La fecha y hora tienen un formato inválido.");
+                recordCreated=false;
+            }
+        } while(recordCreated!=true);
+    }
+    public static void saveFiles(HashMap<String,String> filePathMap){
+        BufferedWriter bufferedWriter = null;
+        for(String filePath : filePathMap.keySet()){
+            try {
+                bufferedWriter = new BufferedWriter(new FileWriter(filePath));
+                if(filePathMap.get(filePath).equals("Doctor")){
+                    for(String record : doctorMap.keySet()){
+                        bufferedWriter.write(doctorMap.get(record).toString());
+                    }
+                } else if(filePathMap.get(filePath).equals("Patient")){
+                    for(String record : patientMap.keySet()){
+                        bufferedWriter.write(patientMap.get(record).toString());
+                    }
+                } else if(filePathMap.get(filePath).equals("Appt")){
+                    for(String record : apptMap.keySet()){
+                        bufferedWriter.write(apptMap.get(record).toString());
+                    }
+                }
+
+            } catch(IOException e) {
+                System.out.println("IOException catched while reading: " + e.getMessage());
+            } finally {
+                try {
+                    if (bufferedWriter != null) {
+                        bufferedWriter.close();
+                    }
+                } catch (IOException e) {
+                    System.out.println("IOException catched while closing: " + e.getMessage());
+                }
             }
         }
-    }*/
+    }
+    public static boolean checkAvailability(String recordId, Date date, String object){
+        boolean available = true;
+        for(String record : apptMap.keySet()){
+            if(apptMap.get(record).doctor.equals(recordId) || apptMap.get(record).patient.equals(recordId)){
+                Date apptDateTime = apptMap.get(record).dateTime;
+                Date apptDateTime30 = addMinutesToDate(30, apptDateTime);
+                Date date30 = addMinutesToDate(30, date);
+                if(date.equals(apptDateTime) || (date.after(apptDateTime) && date.before(apptDateTime30)) || (date30.after(apptDateTime) && date30.before(apptDateTime30))){
+                    if(object.equals("Doctor")){
+                        System.out.println("Ese Doctor ya tiene una cita programada para ese momento.");
+                        available = false;
+                    } else if (object.equals("Patient")){
+                        System.out.println("Ese Paciente ya tiene una cita programada para ese momento.");
+                        available = false;
+                    }
+                }
+            }
+        }
+        return available;
+    }
+
+    public static Date addMinutesToDate(int minutes, Date beforeTime) {
+
+        long curTimeInMs = beforeTime.getTime();
+        Date afterAddingMins = new Date(curTimeInMs
+                + (minutes * ONE_MINUTE_IN_MILLIS));
+        return afterAddingMins;
+    }
 }
