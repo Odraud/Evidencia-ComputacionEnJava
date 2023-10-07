@@ -35,7 +35,6 @@ public class Appt extends Record{
     public String toString() {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String strDate = dateFormat.format(dateTime);
-
-        return "Id: " + recordId + " - Nombre: " + name + " - Fecha y hora: " + strDate + " - Id Doctor: " + doctor + " - Id Paciente: " + patient;
+        return recordId + ", " + name + ", " + strDate + ", " + doctor + ", " + patient + "\n";
     }
 }

@@ -9,6 +9,6 @@ public class Doctor extends Record{
     }
     @Override
     public String toString() {
-        return "Id: " + recordId + " - Nombre: " + name + " - Especialidad: " + specialty;
+        return recordId + ", " + name + ", " + specialty + "\n";
     }
 }

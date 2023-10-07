@@ -10,6 +10,6 @@ public class Admin extends Record{
     }
     @Override
     public String toString() {
-        return "Id: " + recordId + " - Nombre: " + name + " - Contraseña: " + password;
+        return recordId + ", " + name + ", " + password + "\n";
     }
 }
